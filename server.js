@@ -18,13 +18,10 @@ import jobsRouter from "./router/jobRouter.js";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import path from "path";
-
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 dotenv.config();
 const app = express();
-
-app.use(express.static(path.resolve(__dirname, "./client/build")));
 
 app.use(express.json());
 
@@ -35,9 +32,9 @@ app.get("/api/v1", (req, res) => {
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/jobs", authenticateUser, jobsRouter);
 
-app.get("*", (req, res) => {
-    res.sendFile(path.resolve(__dirname, "./client/build", "index.html"));
-});
+// app.get("*", (req, res) => {
+//     res.sendFile(path.resolve(__dirname, "./client/build", "index.html"));
+// });
 
 app.use(notFoundRoute);
 app.use(errorHandler);

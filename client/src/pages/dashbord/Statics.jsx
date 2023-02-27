@@ -1,7 +1,7 @@
 import React from "react";
 
 const Statics = () => {
-    return <div>Statics</div>;
+    return <div>Staticssss ci</div>;
 };
 
 export default Statics;
