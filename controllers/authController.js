@@ -4,7 +4,6 @@ export const register = async (req, res) => {
     const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
-        console.log(new BadRequestError("Please fill all the feilds"));
         throw new BadRequestError("Please fill all the feilds");
     }
 
@@ -49,8 +48,10 @@ export const login = async (req, res) => {
     if (!isCorrect) {
         throw new UnauthenticatedError("invalid credentials");
     }
+
     const token = user.createJwt();
     user.password = undefined;
+
     res.status(200).json({
         status: "success",
         message: "user logged in successfully",
