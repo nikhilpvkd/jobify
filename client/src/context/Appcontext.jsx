@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useReducer } from "react";
 import {
+    CHANGE_PAGE,
     CLEAR_ALERT,
+    CLEAR_FILTERS,
     CLEAR_VALUES,
     CREATE_JOB_BEGIN,
     CREATE_JOB_ERROR,
@@ -18,6 +20,8 @@ import {
     SETUP_USER_ERROR,
     SETUP_USER_SUCCESS,
     SET_EDIT_JOB,
+    SHOW_STATS_BEGIN,
+    SHOW_STATS_SUCCESS,
     TOGGLE_SIDE_BAR,
     UPDATE_USER_BEGIN,
     UPDATE_USER_ERROR,
@@ -53,6 +57,13 @@ export const initialState = {
     totalJobs: 0,
     numOfPages: 1,
     page: 1,
+    stats: {},
+    monthlyApplications: [],
+    search: "",
+    searchStatus: "all",
+    searchType: "all",
+    sort: "latest",
+    sortOptions: ["latest", "oldest", "a-z", "z-a"],
 };
 
 const appContext = createContext();
@@ -60,7 +71,7 @@ const AppProvider = ({ children }) => {
     const [state, dispatch] = useReducer(reducer, initialState);
 
     const authFetch = axios.create({
-        baseURL: "/api/v1",
+        baseURL: `/api/v1`,
     });
 
     authFetch.interceptors.request.use(
@@ -123,7 +134,6 @@ const AppProvider = ({ children }) => {
     };
     const clearAlert = () => {
         setTimeout(() => {
-            console.log("alert cleared");
             dispatch({ type: CLEAR_ALERT });
         }, 3000);
     };
@@ -137,13 +147,11 @@ const AppProvider = ({ children }) => {
     const setupUser = async ({ currentUser, endPoint, alertText }) => {
         dispatch({ type: SETUP_USER_BEGIN });
         try {
-            const { data } = await axios.post(
-                `/api/v1/auth/${endPoint}`,
+            const { data } = await authFetch.post(
+                `/auth/${endPoint}`,
                 currentUser
             );
-            console.log(data);
             const { user, location, token } = data;
-            console.log("success");
             dispatch({
                 type: SETUP_USER_SUCCESS,
                 payload: { user, location, token, alertText },
@@ -151,7 +159,6 @@ const AppProvider = ({ children }) => {
             addUserToLocalStorage(data);
             clearAlert();
         } catch (err) {
-            console.log("err");
             dispatch({ type: SETUP_USER_ERROR, payload: err.response.data });
             clearAlert();
         }
@@ -176,6 +183,10 @@ const AppProvider = ({ children }) => {
 
     const handleChange = ({ name, value }) => {
         dispatch({ type: HANDLE_CHANGE, payload: { name, value } });
+    };
+
+    const clearFilters = () => {
+        dispatch({ type: CLEAR_FILTERS });
     };
 
     //<-------------- create job --------------->
@@ -207,10 +218,19 @@ const AppProvider = ({ children }) => {
         dispatch({ type: CLEAR_VALUES });
     };
 
+    //<-------------- getall jobs --------------->
+
     const getAllJobs = async () => {
+        const { page, searchStatus, searchType, sort, search } = state;
         dispatch({ type: GET_JOBS_BEGIN });
+        let url = `/jobs?page=${page}&status=${searchStatus}&jobType=${searchType}&sort=${sort}`;
+
+        if (search) {
+            url = url + `&search=${search}`;
+        }
+
         try {
-            const { data } = await authFetch("/jobs");
+            const { data } = await authFetch(url);
             const { jobs, totalJobs, numOfPages } = data;
             dispatch({
                 type: GET_JOBS_SUCCESS,
@@ -221,7 +241,7 @@ const AppProvider = ({ children }) => {
                 },
             });
         } catch (err) {
-            console.log(err.response);
+            logoutUser();
             if (err.response.status === 401) return;
         }
         clearAlert();
@@ -234,15 +254,16 @@ const AppProvider = ({ children }) => {
     const deleteJob = async (jobId) => {
         dispatch({ type: DELETE_JOB_BEGIN });
         try {
-            const res = await authFetch.delete(`/jobs/${jobId}`);
+            await authFetch.delete(`/jobs/${jobId}`);
             getAllJobs();
         } catch (err) {
             logoutUser();
         }
     };
 
+    //<-------------- Edit jobs --------------->
+
     const editJob = async () => {
-        console.log("jobedit ");
         dispatch({ type: EDIT_JOB_BEGIN });
         try {
             const {
@@ -275,6 +296,29 @@ const AppProvider = ({ children }) => {
         clearAlert();
     };
 
+    //-------------------------show stats--------------------->
+
+    const showStats = async () => {
+        dispatch({ type: SHOW_STATS_BEGIN });
+        try {
+            const { data } = await authFetch("jobs/stats");
+            dispatch({
+                type: SHOW_STATS_SUCCESS,
+                payload: {
+                    stats: data.stats,
+                    monthlyApplications: data.monthlyApplications,
+                },
+            });
+        } catch (err) {
+            logoutUser();
+            if (err.response.status === 401) return;
+        }
+    };
+
+    const changePage = (page) => {
+        dispatch({ type: CHANGE_PAGE, payload: { page } });
+    };
+
     return (
         <appContext.Provider
             value={{
@@ -291,6 +335,9 @@ const AppProvider = ({ children }) => {
                 deleteJob,
                 setEditJob,
                 editJob,
+                showStats,
+                clearFilters,
+                changePage,
             }}
         >
             {children}

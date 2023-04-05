@@ -1,5 +1,7 @@
 import {
+    CHANGE_PAGE,
     CLEAR_ALERT,
+    CLEAR_FILTERS,
     CLEAR_VALUES,
     CREATE_JOB_BEGIN,
     CREATE_JOB_ERROR,
@@ -17,6 +19,8 @@ import {
     SETUP_USER_ERROR,
     SETUP_USER_SUCCESS,
     SET_EDIT_JOB,
+    SHOW_STATS_BEGIN,
+    SHOW_STATS_SUCCESS,
     TOGGLE_SIDE_BAR,
     UPDATE_USER_BEGIN,
     UPDATE_USER_ERROR,
@@ -51,7 +55,6 @@ export const reducer = (state, action) => {
         };
     }
     if (action.type === SETUP_USER_SUCCESS) {
-        console.log(action.payload);
         return {
             ...state,
             showAlert: true,
@@ -96,7 +99,6 @@ export const reducer = (state, action) => {
         };
     }
     if (action.type === UPDATE_USER_SUCCESS) {
-        console.log(action.payload);
         return {
             ...state,
             showAlert: true,
@@ -121,7 +123,18 @@ export const reducer = (state, action) => {
     if (action.type === HANDLE_CHANGE) {
         return {
             ...state,
+            page: 1,
             [action.payload.name]: action.payload.value,
+        };
+    }
+
+    if (action.type === CLEAR_FILTERS) {
+        return {
+            ...state,
+            search: "",
+            searchStatus: "all",
+            searchType: "all",
+            sort: "latest",
         };
     }
 
@@ -216,6 +229,19 @@ export const reducer = (state, action) => {
             showAlert: true,
             alertType: "danger",
             alertText: action.payload.msg,
+        };
+    }
+    if (action.type === SHOW_STATS_BEGIN) {
+        return { ...state, isLoading: true, showAlert: false };
+    }
+    if (action.type === SHOW_STATS_SUCCESS) {
+        return { ...state, isLoading: false, ...action.payload };
+    }
+
+    if (action.type === CHANGE_PAGE) {
+        return {
+            ...state,
+            page: action.payload.page,
         };
     }
 
