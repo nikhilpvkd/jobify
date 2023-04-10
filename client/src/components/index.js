@@ -8,7 +8,11 @@ import SearchContainer from "./SearchContainer";
 import JobsContainer from "./JobsContainer";
 import Loading from "./Loading";
 import Job from "./Job";
-
+import StatsContainer from "./StatsContainer";
+import StatItem from "./StatItem";
+import ChartsContainer from "./ChartsContainer";
+import FormRowSelect from "./FormRowSelect";
+import PageButtonContainer from "./PageButtonContainer";
 export {
     BigSideBar,
     SmallSideBar,
@@ -20,4 +24,9 @@ export {
     JobsContainer,
     Loading,
     Job,
+    StatsContainer,
+    StatItem,
+    ChartsContainer,
+    FormRowSelect,
+    PageButtonContainer,
 };

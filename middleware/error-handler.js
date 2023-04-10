@@ -1,5 +1,4 @@
 export const errorHandler = (err, req, res, next) => {
-    console.log("entered into error handler==-=-=-", err.message);
     const defaultError = {
         statusCode: err.statusCode || 500,
         message: err.message || "Something went wrong Please try again latter!",

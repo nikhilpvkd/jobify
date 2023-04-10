@@ -1,14 +1,28 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Wrapper from "../assets/wrappers/Navbar";
 import { FaAlignLeft, FaCaretDown, FaUserCircle } from "react-icons/fa";
 import Logo from "../components/Logo";
 import { useAppContext } from "../context/Appcontext";
-import { useEffect } from "react";
 
 const NavBar = () => {
     const { user, showSideBar, logoutUser, toggleSideBar } = useAppContext();
 
-    const [showDropDown, setDropDown] = useState();
+    const [showDropDown, setDropDown] = useState(false);
+
+    const ref = useRef(null);
+
+    useEffect(() => {
+        // closing when clicking out-side logic
+        let handler = (e) => {
+            if (!ref.current.contains(e.target)) {
+                setDropDown(false);
+            }
+        };
+        document.addEventListener("mousedown", handler);
+        return () => {
+            document.removeEventListener("mousedown", handler);
+        };
+    });
 
     return (
         <Wrapper>
@@ -24,7 +38,7 @@ const NavBar = () => {
                     <Logo />
                     <h3 className="logo-text">Dashboard</h3>
                 </div>
-                <div className="btn-container">
+                <div className="btn-container" ref={ref}>
                     <button
                         type="button"
                         className="btn"

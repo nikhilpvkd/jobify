@@ -27,7 +27,6 @@ const Register = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log(values);
         if (
             !values.email ||
             !values.password ||
